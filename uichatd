@@ -1,0 +1,351 @@
+#!/bin/bash
+################################################################################
+# Script Name : uichatd
+# Author : Mitch Winkle, AB4MW
+# Version : 1.07
+# Date : 11 Aug 2015
+# License : Gnu GPL v3.0
+# Description : The UIChat program's listener daemon.
+################################################################################
+#This file is part of UIChat.
+# Copyright 2015 Mitch Winkle
+#
+#   UIChat is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   UIChat is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License along
+#   with UIChat (COPYING text file).  If not, see <http://www.gnu.org/licenses/>
+################################################################################
+# Functions
+#
+# Manage the last 10 stations who use the UICHAT designator in their UI frame
+# with time stamp and duplicate removal.  Heard list is displayed to the user
+# in reverse chronological order.
+fn_heard_list () {
+	grep $1 $HEARD > /dev/null
+	if [[ $? -eq 0 ]]; then
+		sed -i /^$1/d $HEARD
+		echo -e "${1}\t$(date --utc '+%h %d %H:%MZ')" >> $HEARD
+		cat $HEARD|tail -n 10 > $HEARDD
+		mv $HEARDD $HEARD
+	else
+		echo -e "${1}\t$(date --utc '+%h %d %H:%MZ')" >> $HEARD
+	fi	
+}
+# format and send a heard message to the requesting station
+fn_heard_msg () {
+	echo -e " TX> $(tac $HEARD| tr '\n' ' ')"
+	$BEACON -c $mycall -d "UICHAT $digi" -s $axport "$1 $heardlist"
+	echo -n "$PROMPT"
+}
+# send the return message to the requesting station
+fn_return_msg () {
+	echo -e " TX> $2 $1"
+	$BEACON -c $mycall -d "UICHAT $digi" -s $axport "$2 $1"
+	echo -n "$PROMPT"
+}
+# write the incoming message to disk and send ACK
+fn_write_msg () {
+	timestamp=`date`
+	dummy=`echo $1| grep "^\["`
+	if [[ $? -eq 0 ]]; then
+		# Minimal protection of the file system, by removing '/'
+		# characters.  This keeps a rogue from putting a file path
+		# in his message string.
+		#filename="`echo $2|cut -f 1 -d ']'|cut -c 2- | tr -d '/'`.msg"
+		filename="$(echo $2|cut -f 1 -d ']'|cut -c 2- | tr -d '/').msg"
+	else 
+		#filename="`echo $2| tr -d '/'`.msg"
+		filename="$(echo $2| tr -d '/').msg"
+	fi
+	echo "$timestamp -- $2: $1" >> $MSGDIR/$filename
+	chmod 644 $MSGDIR/$filename
+	echo " TX> $2 ack"
+	$BEACON -c $mycall -d "UICHAT $digi" -s $axport "$2 ack"
+	echo -n "$PROMPT"
+}
+# repeat the content of the message sent to you.  message may contain actions for
+# other stations
+fn_repeat_msg () {
+	echo "TX> repeating msg from $2: $1"
+	$BEACON -c $mycall -d "UICHAT $digi" -s $axport "$1"
+	echo -n "$PROMPT"
+}
+# repeat the whole message sent to you.  message may contain actions for
+# the other station.  send [orig_callsign] before message.
+fn_relay_msg () {
+	# $1 is message line including the relay station call
+	# $2 is the $from variable, or the origin callsign of the message
+	# INPUT= mycall;dest_callsign<action>message
+	# OUTPUT = dest_callsign[origin_callsign]<action>message
+	rly_action=$(echo $1 | sed 's/[a-zA-Z0-9]//g'|cut -c 1)
+	dest_call=$(echo "$1" | cut -f 1 -d $rly_action)
+	rly_message=$(echo "$1" | cut -f 2 -d $rly_action)
+	echo " TX> $dest_call[$2]$rly_action$rly_message"
+	$BEACON -c $mycall -d "UICHAT $digi" -s $axport "$dest_call[$2]$rly_action$rly_message"
+	echo -n "$PROMPT"
+}
+# Cleanup function used by traps
+fn_control_c () {
+	[[ -e $UICHATPIPE ]] && rm -f $UICHATPIPE
+	kill -SIGTERM $listenpid
+	exit $?
+}
+# trap interrupt and term signals to clean up
+trap fn_control_c SIGINT
+trap fn_control_c SIGTERM
+VER="UIChat v1.07.11"
+HEARD=/var/ax25/uichatd/heard
+HEARDD=/var/ax25/uichatd/heardd
+MSGDIR=/var/ax25/uichatd
+CONFIG=/etc/uichatd/uichatd.conf
+AXLISTEN=$(which axlisten 2>/dev/null || which listen 2>/dev/null)
+if [[ "$AXLISTEN" == "" ]]; then
+	echo "The axlisten (or listen) tool was not found...ax25-tools must be \
+installed for UIChat to function."
+	fn_control_c
+fi
+BEACON=$(which beacon 2>/dev/null)
+if [[ "$BEACON" == "" ]]; then
+	echo "The beacon tool was not found...ax25-tools must be \
+installed for UIChat to function."
+	fn_control_c
+fi
+PROMPT="UICHAT> "
+# WARNING must match what is in uichat
+UICHATPIPE=/var/run/uichatpipe
+# Get the configuration environment variables
+# NOTE: uichat calls uichatd with mycall axport digi parameters that are
+# loaded below, so uichat overrides what is in the config file for those
+# environment vars.  We use the rest of the environment vars to source responses
+# for things like software version, qth, station info string, name, etc.
+source $CONFIG
+# normalize mycall to lower case, just in case the mycall from the config file
+# is not used. uichat calls uichatd with that parameter, but we want to ensure
+# that in any case, mycall is lower case.
+if [[ $mycall =~ [A-Z] ]]; then
+	mycall=$(echo $mycall|tr 'A-Z' 'a-z')
+fi
+
+# If not root die
+if [[ "$UID" != "0" ]]; then
+	echo "Must be root to run uichat, try sudo uichat..."
+	fn_control_c
+fi
+# Read command line parameters and do sanity checks
+mycall=$1
+# normalize incoming call sign, just in case it has caps
+if [[ $mycall =~ [A-Z] ]]; then
+	mycall=$(echo $mycall|tr 'A-Z' 'a-z')
+fi
+axport=$2
+digi=$3
+DEBUG=1
+# Missing parameters triggers warning and exit 1
+if [[ $mycall == "" || $axport == "" ]]; then
+	echo "input parameter(s) missing!"
+	echo "check for /etc/uichatd/uichatd.conf"
+	exit 1
+fi
+# How long is my call sign?  This makes parsing incoming requests easier.
+call_length=${#mycall}
+# If the call sign is less than 3 chars long (special event station) die
+if [[ $call_length -lt 3 ]]; then
+	echo "invalid call sign length...check your configuration file..."
+	exit 2
+fi
+# The very next character after the call will be the action character
+let action_char=call_length+1
+# The position after the action_char begins the message if it exists
+let message_char=action_char+1
+# If our named pipe got left behind before, kill it!
+if [[ -e $UICHATPIPE ]]; then
+	rm -f $UICHATPIPE
+fi
+# Create a named pipe to bring in the axlisten information to our read loop
+mkfifo $UICHATPIPE
+# Start listening on the channel and send to our pipe
+$AXLISTEN -rp $axport > $UICHATPIPE &
+# the pid for axlisten so we can shut it down properly
+listenpid=$!
+#echo "Listening [$listenpid]"
+# This loop reads from the pipe and acts based on the action command offered
+# by the sending station
+while read -r line
+do	
+	# Assumptions and logic for this loop:
+	# 1. axlisten will return a full UI frame if and only if the frame has
+	# passed a CRC check.  Thus, if we get a header line with UICHAT in it, 
+	# we can be assured that the next line will be it's companion with the 
+	# message data in it.
+	# 2. If we get a UICHAT line, we will glean the FROM call sign and make
+	# it lower case for use with the reply message or relay action.
+	# 3. The very next line from axlisten MUST be the content line of the
+	# UI frame from 2. above.  Therefore, we associate the FROM in 2. with 
+	# the message in 3.
+	if [[ $line =~ UICHAT ]]; then
+		# the call sign of the sending station is captured and made
+		# lower case
+		from=$(echo $line| cut -f 3 -d ' ' | tr 'A-Z' 'a-z')
+		# if this is not my call sign, send it to be listed in the 
+		# heard file
+		if [[ $from != "$mycall" ]]; then
+			fn_heard_list $from
+		fi
+		if [[ $DEBUG == 1 ]]; then
+			echo "$line" >> /var/log/uichat.debug
+		fi
+		# and the next line will be the message itself
+		# we rely completely on axlisten and the way it sends UI frames
+		# with the header on one line and the message on the following 
+		# lines.
+	else	
+		# So this line is the one following the header line and it 
+		# contains our message with the call sign at position 1 in the
+		# string, followed immediately by the action character.  The 
+		# rest of the message line is the actual text, if any, 
+		# that is sent to the receiving station.
+		#
+		# Figure out what command was sent our way and perform it
+		# only listen to lines sent to mycall, allcall or cqcqcq
+		# at the beginning of the line.
+		#dummy=`echo $line |grep -E "^$mycall|^allcall|^cqcqcq"`
+		if [[ $line =~ ^$mycall|^allcall|^cqcqcq ]]; then
+			if [[ $DEBUG == 1 ]]; then
+				echo "$line" >> /var/log/uichat.debug
+			fi
+			# The call+action must be first token and the rest
+			# is the message content (and possibly relay call).
+			# Get the call sign based on station call sign length.  
+			# Check for allcall and cqcqcq first using only three
+			# characters since it may be a special event station.
+			call=$(echo $line|cut -c 1-${call_length})
+			# evaluate the call sign for cq first	
+			if [[ $call =~ '^cqc' ]]; then
+				action="cq"
+				call="cqcqcq"	
+				message=`echo $line| cut -c 8-` 
+			else 
+				# maybe it's an allcall?
+				if [[ $call =~ '^all' ]]; then
+					action='cq'
+					call="allcall"
+					message=`echo $line| cut -c 9-`
+				else
+					# well, it must be a normal call sign then
+					# get the action char
+					action=$(echo $line| cut -c ${action_char})
+					# get the message portion if present
+					message=$(echo $line| cut -c ${message_char}-)
+				fi
+			fi
+			# if there is an orig_callsign get it so we can format the output
+			# correctly because it has relayed through a third station.  
+			# If this is a relay, the message text will start with "["
+			if [[ "$action" == "[" ]]; then
+				relay=1
+				#find the real action command after the "]"
+				action=$(echo $message | cut -f 2 -d ']'| cut -c 1)
+				orig_call=$(echo "$line" | cut -f 2 -d '['| cut -f 1 -d ']')
+				from="$from;$orig_call"
+				message=$(echo "$message" | cut -f 2 -d ']'|cut -c 2-)
+			fi
+			# choose response based on action character 
+			# " @^?$#&!;|"
+			case $action in
+			' ')	# just print the simple message text
+				if [[ $relay -eq 1 ]]; then
+					echo -e "\nRX< $orig_call via $from: $message\n"
+				else
+					echo -e "\nRX< $from: $message\n"
+				fi
+				echo -n "$PROMPT"
+				;;
+			'@')
+				# return the QTH string from the config file
+				echo -e "\nRX< $from: $call@"
+				fn_return_msg "$QTH" "$from"
+				;;
+			'^')
+				# return the VER string from the config file
+				echo -e "\nRX< $from: $call^"
+				fn_return_msg "$VER" "$from"
+				;;
+			'?')
+				# return the STATUS string from the config file
+				# unless it does not exist, in which case just
+				# say "I hear you fine!"
+				echo -e "\nRX< $from: $call?"
+				if [[ $STATUS == "" ]]; then
+					fn_return_msg "I hear you fine!" $from
+				else
+					fn_return_msg "$STATUS" "$from"
+				fi
+				;;
+			'$')
+				# return the heard list file in reverse
+				# chronological order
+				echo -e "\nRX< $from: $call$"
+				fn_heard_msg "$from"
+				;;
+			'#')
+				# write the message text to a file in 
+				# /var/ax25/uichatd/$from.msg
+				echo -e "\nRX< $from: $call#$message"
+				fn_write_msg "$message" "$from" 
+				;;
+			'&')
+				# return the STATION string from the config file
+				echo -e "\nRX< $from: $call&"
+				fn_return_msg "$STATION" $from
+				;;
+			'!')
+				# repeat the message text without the 
+				# originating call sign
+				echo -e "\nRX< $from: $call!$message"
+				fn_repeat_msg "$message" "$from"
+				;;
+			';')
+				# send the message through the callsign found
+				# after the ";" action character and also relay
+				# the originating callsign as [callsign]
+				# between the destination station call and the
+				# the action character
+				# Example: ki6zhd sends a QTH request relay 
+				# to k6bps through ab4mw :
+				# OUT at ki6zhd: ab4mw;k6bps@
+				# OUT at ab4mw: k6bps[ki6zhd]@
+				# OUT at k6bps: ab4mw;ki6zhd I am in the neighborhood
+				# OUT at ab4mw: ki6zhd[k6bps] I am in the neighborhood 
+				echo -e "\nRX< $from: $call;$message"
+				fn_relay_msg "$message" "$from"
+				;;
+			'|')
+				# Print an alert line, the message text, and 
+				# another alert line to try to wake the 
+				# station operator up that there is important
+				# information to copy
+				echo -e "\n\nRX< $from: $call|ALERT ALERT ALERT\n\n"
+				echo -e "${message}"
+				echo -e "\n\nALERT ALERT ALERT\n\n"
+				fn_return_msg "ACK" "$from"
+				;;
+			cq)
+				# print the incoming cq message 
+				echo -e "\nRX< "${from}" "${call}" "${message}"\n"
+				echo -n "$PROMPT"
+				;;
+			*) 	:
+				;;
+			esac
+		fi
+	fi
+done < $UICHATPIPE
+exit 0

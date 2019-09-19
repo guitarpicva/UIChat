@@ -1,0 +1,54 @@
+RIGCTL v1.07.08  9 AUG 2015
+
+If you do not have the rigctl utility installed, then on a Debian-esque system:
+
+	sudo apt-get install libhamlib-utils
+
+You may also be asked to install libhamlib if it is not yet installed.
+
+CONFIG:  For rigctl to work, you will need to find your radio number from the 
+list provided by:
+
+	rigctl -l | more
+
+You will also need to know yhe serial interface that is used to do rig control 
+(CAT, CI-V, etc).  It may be /dev/ttyS0 or /dev/ttyUSB1 or something similar.  
+
+In my case for example:
+
+	rigctlnum=127
+	rigctlport=/dev/ttyUSB2
+
+Edit the file /etc/uichatd/uichatd.rigctl and insert those values and save the file.  
+Restart UIChat and then use the "rig" command in UIChat.  Essentially the "rig" 
+command simply creates the command line for rigctl for you up to the point of 
+you giving commands to the rig.
+
+Examples:
+
+Query the current frequency:
+UICHAT> rig f
+14101600
+
+Set the new frequency:
+UICHAT> rig F 14105000
+
+Turn on PTT:
+UICHAT> rig T 1
+
+Turn off PTT:
+UICHAT> rig T 0
+
+See the "man rigctl" page for full details.
+
+SO FAR I have only tested this on my own rig, so I am anxious to hear feedback 
+from others about whether the minimal configuration is sufficient on other rigs, 
+particularly ICOM since there may need to be a CI-V parameter required.  With 
+your help, I can enhance these configuration parameters.
+
+ONE LAST THING:
+
+The main discussion will be found at Sourceforge.net.  Eventually, the tarballs 
+will also be moved to Sourceforge.
+
+https://sourceforge.net/p/haldigital/discussion/uichat/

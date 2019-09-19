@@ -1,0 +1,29 @@
+################################################################################
+# File Name : uichatd.conf
+# Author : Mitch Winkle, AB4MW
+# Version : 1.07
+# Date : 11 August 2015
+# License : Gnu GPL v3.0
+# Description : The UIChat program's rigctl configuration file.
+################################################################################
+# UIChat(d) rigctl configuration enviroment variables
+#
+# NOTE: REQUIRES libhamlib-utils package
+# To determine your rigctl rig number, run the command :
+#	rigctl -l
+#
+# to list all rigs supported.
+#
+# rigctlport is the serial port used to control the radio, such as /dev/ttyS0
+# or /dev/ttyUSB1, etc.
+#
+# The example below controls a Yaesu FT-450(D) on the /dev/ttyUSB2 serial port.
+# rigctlnum=127
+# rigctlport=/dev/ttyUSB2
+#
+# if CI-V number required, enter it in the rigctlciv parameter
+# rigctlciv=0
+#
+rigctlnum=
+rigctlport=
+rigctlciv=

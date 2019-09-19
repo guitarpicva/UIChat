@@ -1,0 +1,46 @@
+################################################################################
+# File Name : INSTALL
+# Author : Mitch Winkle, AB4MW
+# Version : 1.07
+# Date : 28 July 2015
+# License : Gnu GPL v3.0
+# Description : INSTALL instructions for the UIChat program
+################################################################################
+Installing UIChat
+
+1. cd to the directory where you downloaded the UICHat-<ver>.tar.gz file.
+2. Untar the distribution :
+
+	tar xvzf UIChat-<ver>.tar.gz
+	
+3. cd UIChat-<ver>
+4. To install the program run : 
+
+	sudo ./install.sh
+	
+5. This will install all files to their proper places including :
+
+	/etc/uichatd/uichatd.conf
+	/etc/uichatd/uichatd.template
+	/usr/share/doc/uichatd/UIChat_Syntax.pdf
+	/usr/share/doc/uichatd/README.txt
+	/usr/share/doc/uichatd/COPYING
+	/usr/local/bin/uichat
+	/usr/local/bin/uichatd
+	
+The install script will also create the /var/ax25/uichatd/heard file	
+and set appropriate permissions where applicable.
+
+NOTE: If you are doing an upgrade from a previous version, heard, uichatd.conf and
+any .msg files will NOT be over-written.  You should check uichatd.conf againt
+the latest uichatd.template file to note any changes to it's content or format.
+
+6. To start uichat, simply enter :
+	
+	sudo uichat
+	
+and you will be met with a UICHAT> prompt.  Use ? <Enter> to get a help screen.
+
+Please refer to /usr/share/doc/uichatd/UIChat_Syntax.pdf for syntax rules.
+
+Questions may be directed to ab4mw@yahoo.com.
