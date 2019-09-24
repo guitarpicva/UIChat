@@ -1,24 +1,24 @@
 ################################################################################
-# File Name : README.txt
-# Author : Mitch Winkle, AB4MW
-# Version : 1.07
-# Date : 27 July 2015
-# License : Gnu GPL v3.0
-# Description : README for the UIChat program
+ File Name : README.txt
+ Author : Mitch Winkle, AB4MW
+ Version : 1.07
+ Date : 27 July 2015
+ License : Gnu GPL v3.0
+ Description : README for the UIChat program
 ################################################################################
-# Copyright 2015 Mitch Winkle, AB4MW 
-# 
-# UIChat is free software: you can redistribute it and/or modify it under the 
-# terms of the GNU General Public License as published by the Free Software 
-# Foundation, either version 3 of the License, or (at your option) any later 
-# version. 
-# 
-# UIChat is distributed in the hope that it will be useful, but WITHOUT ANY 
-# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR 
-# A PARTICULAR PURPOSE. See the GNU General Public License for more details. 
-# 
-# You should have received a copy of the GNU General Public License along with 
-# UIChat (COPYING text file). If not, see http://www.gnu.org/licenses 
+ Copyright 2015 Mitch Winkle, AB4MW 
+ 
+ UIChat is free software: you can redistribute it and/or modify it under the 
+ terms of the GNU General Public License as published by the Free Software 
+ Foundation, either version 3 of the License, or (at your option) any later 
+ version. 
+ 
+ UIChat is distributed in the hope that it will be useful, but WITHOUT ANY 
+ WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR 
+ A PARTICULAR PURPOSE. See the GNU General Public License for more details. 
+ 
+ You should have received a copy of the GNU General Public License along with 
+ UIChat (COPYING text file). If not, see http://www.gnu.org/licenses 
 ################################################################################
 The UIChat program is a direct result of the fine work of the authors of FSQCall.
 
@@ -101,13 +101,13 @@ does not seem overly complicated.
 character, "?" as a station status message as stored in the config file or set
 using the "status" command at the UICHAT> prompt.
 6. In it's current form, it ONLY runs on Native AX.25 in Linux using the 
-standard ax25-tools toolset.  I am exploring Java and/or Python as alternatives.
+standard ax25-tools toolset.
 
 INSTALLING UIChat
 
 Unpack the tarball and make scripts executable (<ver> is the version number) :
 
-	tar xvzf UIChat-<ver>.tar.gz
+	git clone https://github.com/guitarpicva/UIChat uichat
 	
 Change to the newly created "uichat" directory and run the install script:
 	cd UIChat-<ver>
@@ -171,6 +171,10 @@ USING UIChat
 To start UIChat, simply open a terminal window and type:
 
 	sudo uichat 
+	
+	(sorry for the elevated requirement but I have not 
+	investigated the permissions necessary to completely
+	control the ax.25 tool set as a regular user)
 	
 You will be presented with a response that looks like :
 
