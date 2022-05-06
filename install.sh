@@ -57,7 +57,7 @@ if [[ -f /etc/uichatd/uichatd.conf ]]; then
 	echo "Existing uichatd.conf file has not been disturbed."
 	echo "Compare with /etc/uichatd/uichatd.template for any new parameters."
 else
-	cp uichatd.conf /etc/uichatd/uichatd.conf
+	cp uichatd.template /etc/uichatd/uichatd.conf
 	chmod 644 /etc/uichatd/uichatd.conf
 fi
 if [[ -f /etc/uichatd/uichatd.rigctl ]]; then
