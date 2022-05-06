@@ -2,13 +2,13 @@
 ################################################################################
 # Script Name : uichatd
 # Author : Mitch Winkle, AB4MW
-# Version : 1.07
-# Date : 11 Aug 2015
+# Version : 1.08
+# Date : 06 May 2022
 # License : Gnu GPL v3.0
 # Description : The UIChat program's listener daemon.
 ################################################################################
 #This file is part of UIChat.
-# Copyright 2015 Mitch Winkle
+# Copyright 2015-2022 Mitch Winkle
 #
 #   UIChat is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by

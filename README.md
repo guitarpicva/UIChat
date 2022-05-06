@@ -2,7 +2,7 @@
  File Name : README.txt
  Author : Mitch Winkle, AB4MW
  Version : 1.08
- Date : 27 July 2015, 06 May 2022
+ Date : 06 May 2022
  License : Gnu GPL v3.0
  Description : README for the UIChat program
 ################################################################################

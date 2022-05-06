@@ -1,4 +1,4 @@
-RIGCTL v1.07.08  9 AUG 2015
+RIGCTL v1.08  06 May 2022
 
 If you do not have the rigctl utility installed, then on a Debian-esque system:
 
@@ -41,14 +41,3 @@ UICHAT> rig T 0
 
 See the "man rigctl" page for full details.
 
-SO FAR I have only tested this on my own rig, so I am anxious to hear feedback 
-from others about whether the minimal configuration is sufficient on other rigs, 
-particularly ICOM since there may need to be a CI-V parameter required.  With 
-your help, I can enhance these configuration parameters.
-
-ONE LAST THING:
-
-The main discussion will be found at Sourceforge.net.  Eventually, the tarballs 
-will also be moved to Sourceforge.
-
-https://sourceforge.net/p/haldigital/discussion/uichat/

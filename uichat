@@ -2,13 +2,13 @@
 ################################################################################
 # Script Name : uichat
 # Author : Mitch Winkle, AB4MW
-# Version : 1.07
-# Date : 11 Aug 2015
+# Version : 1.08
+# Date : 06 May 2022
 # License : Gnu GPL v3.0
 # Description : The UIChat program for SELCAL chats over AX.25 UI frames.
 ################################################################################
 #This file is part of UIChat.
-# Copyright 2015 Mitch Winkle
+# Copyright 2015-2022 Mitch Winkle
 #
 #   UIChat is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@
 ################################################################################
 # Uichat uses beacon to send FSQCall style transmission requests
 # via a native Linux AX.25 system
-VER="UIChat v1.07.11"
+VER="UIChat v1.08"
 if [[ "$UID" != "0" ]]; then 
 	echo "USER:$USER"
 	echo "You must be root to run UIChat."
