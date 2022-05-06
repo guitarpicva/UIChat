@@ -21,8 +21,8 @@
 # rigctlnum=127
 # rigctlport=/dev/ttyUSB2
 #
-# if CI-V number required, enter it in the rigctlciv parameter
-# rigctlciv=0
+# if CI-V number required, enter the hexadecimal value in the rigctlciv parameter
+# rigctlciv=8A
 #
 rigctlnum=
 rigctlport=

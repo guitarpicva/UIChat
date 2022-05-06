@@ -67,12 +67,12 @@ else
 	cp uichatd.rigctl /etc/uichatd/uichatd.rigctl
 fi
 #remove version indicator from the config file.
-sed -i '/^VER=/d' /etc/uichatd/uichatd.conf
-mkdir -p /usr/share/doc/uichatd
-cp README.txt /usr/share/doc/uichatd
-cp COPYING /usr/share/doc/uichatd
-cp UIChat_Syntax.pdf /usr/share/doc/uichatd
-chmod 644 /usr/share/doc/uichatd/*
+#sed -i '/^VER=/d' /etc/uichatd/uichatd.conf
+mkdir -p /usr/local/share/doc/uichatd
+cp README.txt /usr/local/share/doc/uichatd
+cp COPYING /usr/local/share/doc/uichatd
+cp UIChat_Syntax.pdf /usr/local/share/doc/uichatd
+chmod 644 /usr/local/share/doc/uichatd/*
 cp uichat /usr/local/bin
 cp uichatd /usr/local/bin
 chmod 755 /usr/local/bin/uichat

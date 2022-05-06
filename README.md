@@ -1,12 +1,12 @@
 ################################################################################
  File Name : README.txt
  Author : Mitch Winkle, AB4MW
- Version : 1.07
- Date : 27 July 2015
+ Version : 1.08
+ Date : 27 July 2015, 06 May 2022
  License : Gnu GPL v3.0
  Description : README for the UIChat program
 ################################################################################
- Copyright 2015 Mitch Winkle, AB4MW 
+ Copyright 2015-2022 Mitch Winkle, AB4MW 
  
  UIChat is free software: you can redistribute it and/or modify it under the 
  terms of the GNU General Public License as published by the Free Software 

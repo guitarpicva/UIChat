@@ -1,8 +1,8 @@
 ################################################################################
 # File Name : INSTALL
 # Author : Mitch Winkle, AB4MW
-# Version : 1.07
-# Date : 28 July 2015
+# Version : 1.08
+# Date : 28 July 2015, 06 May 2022
 # License : Gnu GPL v3.0
 # Description : INSTALL instructions for the UIChat program
 ################################################################################
@@ -16,15 +16,15 @@ Installing UIChat
 3. cd UIChat-<ver>
 4. To install the program run : 
 
-	sudo ./install.sh
+	sudo . ./install.sh
 	
 5. This will install all files to their proper places including :
 
 	/etc/uichatd/uichatd.conf
 	/etc/uichatd/uichatd.template
-	/usr/share/doc/uichatd/UIChat_Syntax.pdf
-	/usr/share/doc/uichatd/README.txt
-	/usr/share/doc/uichatd/COPYING
+	/usr/local/share/doc/uichatd/UIChat_Syntax.pdf
+	/usr/local/share/doc/uichatd/README.txt
+	/usr/local/share/doc/uichatd/COPYING
 	/usr/local/bin/uichat
 	/usr/local/bin/uichatd
 	
@@ -43,4 +43,4 @@ and you will be met with a UICHAT> prompt.  Use ? <Enter> to get a help screen.
 
 Please refer to /usr/share/doc/uichatd/UIChat_Syntax.pdf for syntax rules.
 
-Questions may be directed to ab4mw@yahoo.com.
+Questions may be directed to ab4mw@radcommsoft.com
