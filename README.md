@@ -110,7 +110,9 @@ Unpack the tarball and make scripts executable (<ver> is the version number) :
 	git clone https://github.com/guitarpicva/UIChat
 	
 Change to the newly created "UIChat" directory and run the install script:
+
 	cd UIChat
+	
 	sudo ./install.sh
 	
 The install script is a full install for new installations and an upgrade for
