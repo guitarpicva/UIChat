@@ -121,7 +121,9 @@ for an upgrade is to review the /etc/uichatd.template file for any changes to
 the /etc/uichatd/uichatd.conf format or added fields.
 	
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!	
+
 !!! Now edit the /etc/uichatd/uichatd.conf and make it your own. !!!
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	
 	sudo nano /etc/uichatd/uichatd.conf
