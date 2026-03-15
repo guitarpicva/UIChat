@@ -24,7 +24,7 @@
 #   with UIChat (COPYING text file). If not, see <http://www.gnu.org/licenses/>.
 ################################################################################
 if [[ $UID != "0" ]]; then
-	echo -e "You must be root to install this program.\n\nTry sudo ./install"
+	echo -e "You must be root to install this program.\n\nTry sudo ./install.sh"
 	exit 1
 fi
 echo " This install script installs a new UIChat system or upgrades an existing" 
